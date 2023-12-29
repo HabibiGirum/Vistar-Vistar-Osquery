@@ -1,0 +1,240 @@
+name: build_windows Vistar
+on:
+  push:
+    branches:
+      - main
+jobs:
+  Call_Selenium_For_Registration:
+    runs-on: windows-latest  # Use a Windows runner
+
+    outputs:
+      call_selenium_output: ${{steps.gmail.outputs.call_selenium_output}}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x  # Specify the Python version you need
+
+    - name: Install dependencies
+      run: |
+        pip install pyinstaller
+        # Add any other dependencies your script might have
+    - name: install
+      run: |
+        pip install selenium
+
+    - name: Build executable
+      id: gmail
+      run: |
+        pyinstaller --onefile gmail.py
+        # Replace 'gmail.py' with the actual name of your Python script
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: gmail
+        path: ./dist/gmail.exe # Replace 'your_script' with the name of the executable
+
+  Send_Data_To_Remote_Server:
+    runs-on: windows-latest  # Use a Windows runner
+    outputs:
+      send_Data: ${{steps.Send.outputs.send_Data}}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x  # Specify the Python version you need
+
+    - name: Install dependencies
+      run: |
+        pip install pyinstaller
+        # Add any other dependencies your script might have
+    - name: install requests
+      run: |
+        pip install requests
+
+
+    - name: Build executable
+      id: Send
+      run: |
+        pyinstaller --onefile os.py
+        # Replace 'gmail.py' with the actual name of your Python script
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: os
+        path: ./dist/os.exe 
+        
+  build_Msi_File:
+    needs: [Call_Selenium_For_Registration, Send_Data_To_Remote_Server]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build_type: [Release]
+        bitness: [64, arm64]
+        os: [windows-2019]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # - name: Congigure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
+          
+      - name: setup the VC arch
+        shell: powershell
+        id: vc_arch
+        run: |
+          $arch = switch ("${{ matrix.bitness }}")
+          {
+              "64" { "x64" }
+              "arm64" { "x64_arm64" }
+          }
+          echo "VC_ARCH=$arch" >>$env.GITHUB_OUTPUT
+          
+      - name: configure git
+        run: |
+            git config --global core.autocrlf false
+            git config --global core.symblinks true 
+            
+      - name: Initialize the Python 3 installation
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Locate the python root directory
+        id: python_root_directory
+        shell: powershell
+        run: |
+          $python_executable_path = $(Get-Command python.exe | Select-Object -ExpandProperty Definition)
+          $python_root_directory = (Get-Item $python_executable_path).Directory.FullName
+          echo "VALUE=$python_root_directory" >> $env:GITHUB_OUTPUT
+      # Install the python dependencies needed for our testing framework
+      - name: Install tests prerequisites
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install wheel `
+                                setuptools `
+                                psutil `
+                                timeout_decorator `
+                                thrift==0.11.0 `
+                                osquery `
+                                pywin32
+
+      - name: Clone osquery repository
+        run: git clone https://github.com/osquery/osquery.git
+        working-directory: ${{ github.workspace }}
+
+
+      - name: install Strawberry perl
+        working-directory: ${{ github.workspace }}/osquery
+        shell: powershell
+        run: |
+          tools\ci\scripts\install_openssl_formula_dependencies.ps1
+
+      - name: Install CMake
+        working-directory: ${{ github.workspace }}
+        shell: powershell
+        run: |
+          $long_cmake_ver = "3.21.4"
+          $short_cmake_ver = $($long_cmake_ver.split(".")[0] + "." + $long_cmake_ver.split(".")[1])
+          $folder_name = $("cmake-" + $long_cmake_ver + "-windows-x86_64")
+          $archive_name = $($folder_name + ".zip")
+          $url = $("https://cmake.org/files/v" + $short_cmake_ver + "/" + $archive_name)
+          (New-Object System.Net.WebClient).DownloadFile($url, $archive_name)
+          7z x -o${{ github.workspace }} -y $archive_name
+          echo "${{ github.workspace }}\$folder_name\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Install Ninja
+        working-directory: ${{ github.workspace }}
+        shell: powershell
+        run: |
+          $long_version = "1.10.0"
+          $archive_name = "ninja-win.zip"
+          $url = $("https://github.com/ninja-build/ninja/releases/download/v" + $long_version + "/" + $archive_name)
+          (New-Object System.Net.WebClient).DownloadFile($url, $archive_name)
+          7z x -o${{ github.workspace }}\ninja -y $archive_name
+          echo "${{ github.workspace }}\ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          
+      - name: Download and build osquery source
+        working-directory: ${{ github.workspace }}
+        shell: powershell
+        run: |
+          # git clone https://github.com/osquery/osquery
+          cd osquery
+          # Configure
+          mkdir build
+          cd build
+          cmake -G "Visual Studio 16 2019" -A x64 ..
+          # Build
+          # cmake --build . --config RelWithDebInfo -j 3 --target install --config Release
+          mkdir package_data
+          $Env:DESTDIR="./osquery/build/package_data"
+          cmake --build . --target install --config Release -j 3
+    
+      # - name: Install dependencies
+      #   run: |
+      #     pip install pyinstaller
+      # - name: install
+      #   run: |
+      #     pip install selenium
+      # - name: install requests
+      #   run: |
+      #     pip install requests
+          
+      # - name: Build executable gmail
+      #   run: |
+      #     pyinstaller --onefile gmail.py
+      
+      # - name: Build executable os
+      #   run: |
+      #     pyinstaller --onefile os.py
+      - name: output from selenium and send data
+        run: |
+          echo "${{ needs.Call_Selenium_For_Registration.outputs.call_selenium_output }}"
+          echo "${{ needs.Send_Data_To_Remote_Server.outputs.send_Data }}"
+        
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          path: osquery-osquery
+
+        
+
+      - name: set path for candle and light
+        run: |
+          echo "C:\\Program Files (x86)\\WiX Toolset v3.11\\bin" >> $GITHUB_PATH
+        shell: bash
+      
+      - name: Build Wix Project
+        working-directory: ${{ github.workspace }}
+        run: | 
+          candle.exe -ext "WixUIExtension.dll" ./msi.wxs
+          light.exe -ext "WixUIExtension.dll" -out "Vistar.msi" ./msi.wixobj
+      # - name: Code Signing
+      #   run: |
+      #     $certPassword = ${{ secrets.CERTIFICATE_PASSWORD }}
+      #     $certPath = ${{ secrets.CERTIFICATE_PATH }}
+      #     $msiPath = "${{ github.workspace }}/Vistar.msi"
+  
+      #     # Sign the MSI file using the code signing certificate
+      #     signtool sign /v /f $certPath /p $certPassword $msiPath
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Vistar
+          path: Vistar.msi
+      # - name: Deploy to AWS S3
+      #   run: |
+      #     aws s3 sync Vistar.msi s3://s3--vistar/
