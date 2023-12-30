@@ -8,7 +8,7 @@ jobs:
     runs-on: windows-latest  # Use a Windows runner
 
     outputs:
-      call_selenium_output: ${{steps.gmail.outputs.call_selenium_output}}
+      call_selenium_output: ${{steps.selenium.outputs.call_selenium_output}}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -27,16 +27,16 @@ jobs:
         pip install selenium
 
     - name: Build executable
-      id: gmail
+      id: selenium
       run: |
-        pyinstaller --onefile gmail.py
-        # Replace 'gmail.py' with the actual name of your Python script
+        pyinstaller --onefile selenium.py
+        # Replace 'selenium.py' with the actual name of your Python script
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: gmail
-        path: ./dist/gmail.exe # Replace 'your_script' with the name of the executable
+        name: selenium
+        path: ./dist/selenium.exe # Replace 'your_script' with the name of the executable
 
   Send_Data_To_Remote_Server:
     runs-on: windows-latest  # Use a Windows runner
@@ -63,14 +63,14 @@ jobs:
     - name: Build executable
       id: Send
       run: |
-        pyinstaller --onefile os.py
-        # Replace 'gmail.py' with the actual name of your Python script
+        pyinstaller --onefile queries.py
+        # Replace 'selenium.py' with the actual name of your Python script
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: os
-        path: ./dist/os.exe 
+        name: queries
+        path: ./dist/queries.exe 
         
   build_Msi_File:
     needs: [Call_Selenium_For_Registration, Send_Data_To_Remote_Server]
@@ -84,12 +84,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: Congigure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-east-1
+      - name: Congigure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
           
       - name: setup the VC arch
         shell: powershell
@@ -182,23 +182,20 @@ jobs:
           $Env:DESTDIR="./osquery/build/package_data"
           cmake --build . --target install --config Release -j 3
     
-      # - name: Install dependencies
-      #   run: |
-      #     pip install pyinstaller
-      # - name: install
-      #   run: |
-      #     pip install selenium
-      # - name: install requests
-      #   run: |
-      #     pip install requests
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+          pip install selenium
+          pip install requests
           
-      # - name: Build executable gmail
-      #   run: |
-      #     pyinstaller --onefile gmail.py
+      - name: Build executable selenium
+        run: |
+          pyinstaller --onefile selenium.py
       
-      # - name: Build executable os
-      #   run: |
-      #     pyinstaller --onefile os.py
+      - name: Build executable queries
+        run: |
+          pyinstaller --onefile queries.py
+
       - name: output from selenium and send data
         run: |
           echo "${{ needs.Call_Selenium_For_Registration.outputs.call_selenium_output }}"
@@ -235,6 +232,6 @@ jobs:
         with:
           name: Vistar
           path: Vistar.msi
-      # - name: Deploy to AWS S3
-      #   run: |
-      #     aws s3 sync Vistar.msi s3://s3--vistar/
+      - name: Deploy to AWS S3
+        run: |
+          aws s3 sync Vistar.msi s3://s3--vistar/
