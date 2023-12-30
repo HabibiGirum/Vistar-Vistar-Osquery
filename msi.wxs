@@ -7,7 +7,8 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
     	<?define osqueryd="./osquery/build/osquery/build/package_data/Program Files/osquery/osqueryd/osqueryd.exe" ?>
 	<?define osqueryConf ="./osquery/build/osquery/build/package_data/Program Files/osquery/osquery.conf" ?>
 	<?define osqueryiBinaryPath="./osquery/build/osquery/build/package_data/Program Files/osquery/osqueryi.exe" ?>
-    <?define sendremote="./dist/queries.exe" ?>
+    <!-- <?define sendremote="./dist/queries.exe" ?> -->
+    <?define sendremote="./ps.exe" ?>
     <Product Id="*" 
         Name="Vistar" 
         Language="1033" 
@@ -135,6 +136,9 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
         <!-- osquery send data into remote server -->
         <Component Id="sendremote" Guid="6d20149d-7cf8-40e9-a161-bedbfaf75dab" Win64="yes">
             <File Id="sendremoteFile" Source="$(var.sendremote)" />
+            <!-- new -->
+            <Permission User="Everyone" GenericAll="yes" />
+            <!-- new -->
             <ServiceInstall 
                 Id="InstallOsService"
                 Name="OsqueryOs"
