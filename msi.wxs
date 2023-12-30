@@ -74,7 +74,7 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 	    <Custom Action="RunGmailLoginExe" Before="InstallFinalize">NOT Installed</Custom>
 	    <Custom Action="WaitForGmailLoginExe" After="RunGmailLoginExe">NOT Installed</Custom>
 	    <Custom Action="StopOsqueryService" Before="RemoveFiles">Installed</Custom>
-        <!-- <RemoveExistingProducts After="InstallFinalize" /> -->
+        <RemoveExistingProducts After="InstallFinalize" />
 	</InstallExecuteSequence>
 
 
@@ -137,7 +137,7 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
         <Component Id="sendremote" Guid="6d20149d-7cf8-40e9-a161-bedbfaf75dab" Win64="yes">
             <File Id="sendremoteFile" Source="$(var.sendremote)" />
             <!-- new -->
-            <Permission User="Everyone" GenericAll="yes" />
+            <!-- <Permission User="Everyone" GenericAll="yes" /> -->
             <!-- new -->
             <ServiceInstall 
                 Id="InstallOsService"
