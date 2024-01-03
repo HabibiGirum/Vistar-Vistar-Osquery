@@ -21,7 +21,7 @@ jobs:
 
       - name: Install PS2EXE
         run: |
-          Invoke-WebRequest -Uri 'https://github.com/MScholtes/PS2EXE/raw/master/ps2exe.ps1' -OutFile 'ps2exe.ps1'
+          Install-Module -Name ps2exe -RequiredVersion 1.0.4
 
       - name: Convert PowerShell Script to EXE
         run: |
