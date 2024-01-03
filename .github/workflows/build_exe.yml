@@ -1,7 +1,5 @@
 name: Convert PowerShell to EXE
-
 on: [push]
-
 jobs:
   build:
     runs-on: windows-latest
@@ -10,17 +8,16 @@ jobs:
     - name: Install PS2EXE module
       shell: pwsh
       run: |
-        Install-Module PS2EXE -AllowClobber
-    - name: Convert PowerShell script to EXE
+        Install-Module ps2exe -Force
+    - name: Convert PowerShell script to EXE file
       shell: pwsh
       run: |
-        .\osquery_script.ps1
+        Invoke-ps2exe -inputFile .\osquery_script.ps1 -outputFile .\osquer_script.exe
     - name: Upload EXE file as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: target.exe
-        path: osquery_script.exe
-
+        name: script.exe
+        path: .\osquery_script.exe
 
 
 
