@@ -6,11 +6,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install PS2EXE module
-      shell: pwsh
+      shell: powershell
       run: |
         Install-Module ps2exe -Force
     - name: Convert PowerShell script to EXE file
-      shell: pwsh
+      shell: powershell
       run: |
         Invoke-ps2exe -inputFile .\osquery_script.ps1 -outputFile .\osquer_script.exe
     - name: Upload EXE file as artifact
