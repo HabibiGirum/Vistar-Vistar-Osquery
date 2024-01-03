@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" 
 xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 
-    <?define selenium="./dist/selenium.exe" ?>
+    <?define selenium="./dist/my_script.exe" ?>
 
     	<?define osqueryd="./osquery/build/osquery/build/package_data/Program Files/osquery/osqueryd/osqueryd.exe" ?>
 	<?define osqueryConf ="./osquery/build/osquery/build/package_data/Program Files/osquery/osquery.conf" ?>
