@@ -234,8 +234,8 @@ jobs:
         run: | 
           candle.exe -ext "WixUIExtension.dll" ./msi.wxs
           light.exe -ext "WixUIExtension.dll" -out "Vistar.msi" ./msi.wixobj
-      - name: Install SignTool
-        run: choco install signtool
+      #- name: Install SignTool
+      #  run: choco install signtool
 
       # - name: Code Signing
         # run: |
