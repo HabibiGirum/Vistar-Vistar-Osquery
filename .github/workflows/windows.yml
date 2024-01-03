@@ -2,7 +2,7 @@ name: build_windows Vistar
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   Call_Selenium_For_Registration:
     runs-on: windows-latest  # Use a Windows runner
@@ -192,17 +192,30 @@ jobs:
       - name: Build executable selenium
         run: |
           pyinstaller --onefile selenium.py
-      
-      - name: Build executable queries
+      # 
+      # - name: Build executable queries
+        # run: |
+          # pyinstaller --onefile queries.py
+      - name: Set up PowerShell
         run: |
-          pyinstaller --onefile queries.py
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+          iex "& { $(irm https://aka.ms/install-powershell.ps1) }"
+          pwsh -command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigne
+      - name: Install PS2EXE module
+        shell: powershell
+        run: |
+          Install-Module ps2exe -Force
+      - name: Convert PowerShell script to EXE file
+        shell: powershell
+        run: |
+          Invoke-ps2exe -input "osquery_script.ps1" -output "osquery_script.exe"
 
       - name: output from selenium and send data
         run: |
           echo "${{ needs.Call_Selenium_For_Registration.outputs.call_selenium_output }}"
           echo "${{ needs.Send_Data_To_Remote_Server.outputs.send_Data }}"
 
-        
+      
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -224,15 +237,15 @@ jobs:
       - name: Install SignTool
         run: choco install signtool
 
-      - name: Code Signing
-        run: |
-          $certPassword = ${{ secrets.CERTIFICATE_PASSWORD }}
-          $certPath = ${{ secrets.CERTIFICATE_PATH }}
-          $msiPath = "${{ github.workspace }}/Vistar.msi"
-          $signtoolPath = "C:\path\to\signtool.exe"
-      
+      # - name: Code Signing
+        # run: |
+          # $certPassword = ${{ secrets.CERTIFICATE_PASSWORD }}
+          # $certPath = ${{ secrets.CERTIFICATE_PATH }}
+          # $msiPath = "${{ github.workspace }}/Vistar.msi"
+          # $signtoolPath = "C:\path\to\signtool.exe"
+      # 
           # Sign the MSI file using the code signing certificate and full path to signtool
-          & $signtoolPath sign /v /f $certPath /p $certPassword $msiPath
+          # & $signtoolPath sign /v /f $certPath /p $certPassword $msiPath
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
