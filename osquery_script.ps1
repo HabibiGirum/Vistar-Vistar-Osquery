@@ -20,7 +20,7 @@ while ($true) {
         $simplifiedName = $query.Value
 
         try {
-            $osqueryOutput = & "C:\Program Files\osquery\osqueryi.exe" "--json" $queryText
+            $osqueryOutput = & 'C:\Program Files\osquery\osqueryi.exe' "--json" $queryText
             $osqueryData = $osqueryOutput | ConvertFrom-Json
             $allOsqueryData[$simplifiedName] = $osqueryData
         }
