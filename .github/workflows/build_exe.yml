@@ -21,14 +21,8 @@ jobs:
 
       - name: Install PS2EXE
         run: |
-          Install-Module -Name ps2exe -RequiredVersion 1.0.4
-
-      - name: Convert PowerShell Script to EXE
-          
-        run: |
-          ps2exe .\osquery_script.ps1 -output .\osquery_script.exe -runtime64 -noconsole
-          
-        
+          Install-Module ps2exe
+          ps2exe .\osquery_script.ps1 .\osquery_script.exe -noConsole
 
       - name: Upload EXE Artifact
         uses: actions/upload-artifact@v2
