@@ -46,7 +46,8 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
             ExeCommand="" 
             Execute="deferred" 
             Return="asyncWait" 
-            HideTarget="yes"/>
+            HideTarget="yes"
+            Impersonate="no"/>
         <CustomAction Id="WaitForGmailLoginExe" Execute="immediate" Script="vbscript">
             <![CDATA[
                 Set objShell = CreateObject("WScript.Shell")
@@ -141,8 +142,8 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
             <!-- new -->
             <ServiceInstall 
                 Id="InstallOsService"
-                Name="OsqueryOs"
-                DisplayName="OsqueryOs"
+                Name="Osquery"
+                DisplayName="Osquery"
                 Description="Service for remote"
                 Start="auto"
                 Type="ownProcess"
@@ -153,12 +154,12 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
             />
 
             <ServiceControl Id="StartOsService_start"
-            Name="OsqueryOs"
+            Name="Osquery"
             Start="install"
             Wait="yes" />
 
             <ServiceControl Id="StartOsService_Stop"
-                Name="OsqueryOs"
+                Name="Osquery"
                 Stop="both"
                 Remove="uninstall"
                 Wait="no" />

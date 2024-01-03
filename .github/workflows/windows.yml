@@ -29,14 +29,14 @@ jobs:
     - name: Build executable
       id: selenium
       run: |
-        pyinstaller --onefile selenium.py
-        # Replace 'selenium.py' with the actual name of your Python script
+        pyinstaller --onefile my_script.py
+        # Replace 'my_script.py' with the actual name of your Python script
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: selenium
-        path: ./dist/selenium.exe # Replace 'your_script' with the name of the executable
+        name: my_script
+        path: ./dist/my_script.exe # Replace 'your_script' with the name of the executable
 
   Send_Data_To_Remote_Server:
     runs-on: windows-latest  # Use a Windows runner
@@ -64,7 +64,7 @@ jobs:
       id: Send
       run: |
         pyinstaller --onefile queries.py
-        # Replace 'selenium.py' with the actual name of your Python script
+        # Replace 'my_script.py' with the actual name of your Python script
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
@@ -191,11 +191,13 @@ jobs:
           
       - name: Build executable selenium
         run: |
-          pyinstaller --onefile selenium.py
+          pyinstaller ./my_script.py --onefile --noconsole
       # 
       # - name: Build executable queries
         # run: |
           # pyinstaller --onefile queries.py
+          
+          
       - name: Set up PowerShell
         run: |
           Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
