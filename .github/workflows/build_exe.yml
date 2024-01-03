@@ -18,7 +18,7 @@ jobs:
     - name: Convert PowerShell script to EXE file
       shell: powershell
       run: |
-        .\ps2exe.ps1 -input "osquery_script.ps1" -output "osquery_script.exe"
+        Invoke-ps2exe -input "osquery_script.ps1" -output "osquery_script.exe"
     - name: Upload EXE file as artifact
       uses: actions/upload-artifact@v2
       with:
