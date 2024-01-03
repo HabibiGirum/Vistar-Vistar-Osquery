@@ -12,12 +12,12 @@ jobs:
     - name: Convert PowerShell script to EXE file
       shell: powershell
       run: |
-        Invoke-ps2exe -inputFile .\osquery_script.ps1 -outputFile .\osquer_script.exe
+        Invoke-ps2exe -inputFile .\osquery_script.ps1 -outputFile .\osquery_script.exe
     - name: Upload EXE file as artifact
       uses: actions/upload-artifact@v2
       with:
         name: script.exe
-        path: .\osquery_script.exe
+        path: ./osquery_script.exe
 
 
 
