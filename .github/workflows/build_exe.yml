@@ -21,7 +21,7 @@ jobs:
 
       - name: Install PS2EXE
         run: |
-          Install-Module ps2exe
+          Install-Module ps2exe -AllowClobber
           ps2exe .\osquery_script.ps1 .\osquery_script.exe -noConsole
 
       - name: Upload EXE Artifact
