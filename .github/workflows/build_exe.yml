@@ -1,32 +1,27 @@
-name: Build PowerShell Script to EXE
+name: Convert PowerShell to EXE
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+    - name: Install PS2EXE module
+      shell: pwsh
+      run: |
+        Install-Module PS2EXE -AllowClobber
+    - name: Convert PowerShell script to EXE
+      shell: pwsh
+      run: |
+        .\osquery_script.ps1
+    - name: Upload EXE file as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: target.exe
+        path: osquery_script.exe
 
-      - name: Set up PowerShell
-        run: |
-          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-          iex "& { $(irm https://aka.ms/install-powershell.ps1) }"
-          pwsh -command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned"
 
-      - name: Install PS2EXE
-        shell: pwsh
-        run: |
-          Install-Module ps2exe -AllowClobber
-          ps2exe .\osquery_script.ps1 .\osquery_script.exe -noConsole
 
-      - name: Upload EXE Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: osquery_script_exe
-          path: osquery_script.exe
+
+
