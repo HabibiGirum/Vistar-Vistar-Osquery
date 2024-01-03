@@ -1,12 +1,5 @@
-# Import the modules for subprocess, requests, json and time
-Import-Module -Name Subprocess
-Import-Module -Name Requests
-Import-Module -Name Json
-Import-Module -Name Time
-
 # Define the osquery queries and their simplified names as a hashtable
 $osquery_queries = @{
-
     "SELECT REPLACE(CONCAT(hostname, '-', uuid), '-', '_') AS uniqueId FROM system_info;" = "uniqueId"
     "SELECT name, version FROM os_version;" = "os_version"
     "SELECT REPLACE(CONCAT(hostname, '-', uuid), '-', '_') AS uniqueId FROM system_info;" = "uniqueId"
@@ -30,11 +23,11 @@ while ($true) {
     # Run each osquery query and capture the output
     foreach ($query in $osquery_queries.Keys) {
         try {
-            $osquery_output = Invoke-Subprocess -Command "C:\Program Files\osquery\osqueryi.exe" -Arguments "--json", $query -Shell
-            $osquery_data = ConvertFrom-Json -InputObject $osquery_output
+            $osquery_output = & "C:\Program Files\osquery\osqueryi.exe" "--json" $query
+            $osquery_data = $osquery_output | ConvertFrom-Json
             $all_osquery_data[$osquery_queries[$query]] = $osquery_data
         }
-        catch [Subprocess.CalledProcessError] {
+        catch [System.Management.Automation.MethodInvocationException] {
             Write-Host "Error running osquery for query '$query': $_"
         }
         catch {
@@ -42,9 +35,9 @@ while ($true) {
         }
     }
 
-    # Send the combined data to the endpoint using the requests module
+    # Send the combined data to the endpoint using the Invoke-RestMethod cmdlet
     try {
-        $response = Invoke-Request -Method Post -Uri $endpoint_url -Json $all_osquery_data
+        $response = Invoke-RestMethod -Method Post -Uri $endpoint_url -Body ($all_osquery_data | ConvertTo-Json) -ContentType "application/json"
         if ($response.StatusCode -eq 201) {
             Write-Host "Data sent successfully. Status code: 201"
         }
@@ -52,7 +45,7 @@ while ($true) {
             Write-Host "Failed to send data. Status code: $($response.StatusCode)"
         }
     }
-    catch [Requests.RequestException] {
+    catch [System.Net.WebException] {
         Write-Host "Error sending data: $_"
     }
 
