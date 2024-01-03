@@ -52,4 +52,6 @@ while ($true) {
 
     # Sleep for the specified interval before the next run
     Start-Sleep -Seconds $intervalSeconds
+
 }
+
