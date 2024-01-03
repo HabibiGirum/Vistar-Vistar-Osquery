@@ -5,6 +5,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set up PowerShell
+      run: |
+        Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+        iex "& { $(irm https://aka.ms/install-powershell.ps1) }"
+        pwsh -command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned"
+
     - name: Install PS2EXE module
       shell: powershell
       run: |
