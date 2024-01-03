@@ -14,9 +14,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up PowerShell
-        uses: PowerShell/PowerShell@v7
-        with:
-          pwsh: 'pwsh.exe'
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+          iex "& { $(irm https://aka.ms/install-powershell.ps1) }"
+          pwsh -command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned"
 
       - name: Install PS2EXE
         run: |
