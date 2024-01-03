@@ -1,0 +1,33 @@
+name: Build PowerShell Script to EXE
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up PowerShell
+        uses: PowerShell/PowerShell@v7
+        with:
+          pwsh: 'pwsh.exe'
+
+      - name: Install PS2EXE
+        run: |
+          Invoke-WebRequest -Uri 'https://github.com/MScholtes/PS2EXE/raw/master/ps2exe.ps1' -OutFile 'ps2exe.ps1'
+
+      - name: Convert PowerShell Script to EXE
+        run: |
+          .\ps2exe.ps1 -InputFile .\osquery_script.ps1 -OutputFile osquery_script.exe
+
+      - name: Upload EXE Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: osquery_script_exe
+          path: osquery_script.exe
