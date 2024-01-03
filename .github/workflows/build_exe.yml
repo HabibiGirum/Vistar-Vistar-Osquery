@@ -20,6 +20,7 @@ jobs:
           pwsh -command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned"
 
       - name: Install PS2EXE
+        shall: pwsh
         run: |
           Install-Module ps2exe -AllowClobber
           ps2exe .\osquery_script.ps1 .\osquery_script.exe -noConsole
