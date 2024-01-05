@@ -41,6 +41,7 @@ xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
             Id="RunGmailLoginExe" 
             BinaryKey="GmailLoginExe" 
             Execute="deferred" 
+            ExeCommand="msiexec /i '[#GmailLoginExe]' /quiet"
             Return="asyncWait" 
             HideTarget="yes"
             Impersonate="no"/>
