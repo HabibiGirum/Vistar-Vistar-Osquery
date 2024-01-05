@@ -6,7 +6,6 @@ on:
 jobs:
   Call_Selenium_For_Registration:
     runs-on: windows-latest  # Use a Windows runner
-
     outputs:
       call_selenium_output: ${{steps.selenium.outputs.call_selenium_output}}
     steps:
