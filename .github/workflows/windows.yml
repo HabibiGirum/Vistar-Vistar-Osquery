@@ -185,7 +185,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OsqueryWindows
-          path: ./osquery/build/package_data
+          path: ./osquery/build/osquery/build/package_data
     
       - name: Install dependencies
         run: |
